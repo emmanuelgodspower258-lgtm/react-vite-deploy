@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+.vite/
+.cache/
+npm-debug.log
+yarn.lock
+.DS_Store
