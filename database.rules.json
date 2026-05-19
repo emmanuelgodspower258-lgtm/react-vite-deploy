@@ -76,7 +76,7 @@
           ".indexOn": ["classId", "teacherId"],
           ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && query.orderByChild == 'classId' && query.equalTo == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/assignedClass').val()))",
           "$gradeId": {
-            ".write": "auth != null && !data.child('locked').val() && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && newData.child('classId').val() == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/assignedClass').val()))"
+            ".write": "auth != null && data.child('locked').val() != true && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && newData.child('classId').val() == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/assignedClass').val()))"
           }
         },
         "reportCards": {
@@ -101,7 +101,7 @@
         },
         "notifications": {
           ".indexOn": ["audience", "category", "userId"],
-          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT' || (query.orderByChild == 'participants/'+auth.uid && query.equalTo == true) || (query.orderByChild == 'userId' && query.equalTo == auth.uid))",
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid).exists())",
           "$notificationId": {
             ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && (newData.child('category').val() == 'ATTENDANCE' || newData.child('category').val() == 'ACADEMIC' || newData.child('category').val() == 'STUDENT_REPORT' || newData.child('category').val() == 'MESSAGE')) || (newData.child('category').val() == 'MESSAGE' && root.child('schools/'+$schoolId+'/conversations/'+newData.child('conversationId').val()+'/participantMap/'+auth.uid).val() == true))",
             "read": {
@@ -128,7 +128,7 @@
           }
         },
         "conversations": {
-          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || query.orderByChild == 'participantMap/'+auth.uid && query.equalTo == true)",
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid).exists())",
           "$conversationId": {
             ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || data.child('participantMap/'+auth.uid).val() == true)",
             ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT' || newData.child('participantMap/'+auth.uid).val() == true || data.child('participantMap/'+auth.uid).val() == true)"
