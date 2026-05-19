@@ -1,0 +1,164 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "superAdmins": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid == $uid || root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN')",
+        ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || (auth.uid == $uid && (!data.exists() || data.child('role').val() == 'SUPER_ADMIN')))",
+        ".validate": "newData.hasChildren(['uid', 'email', 'role']) && newData.child('uid').val() == $uid"
+      }
+    },
+    "userSchools": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid == $uid || root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN')",
+        ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || (newData.hasChild('schoolId') && (root.child('schools/'+newData.child('schoolId').val()+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+newData.child('schoolId').val()+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL')))",
+        ".validate": "newData.hasChildren(['schoolId', 'role'])"
+      }
+    },
+    "schools": {
+      ".read": "auth != null && root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN'",
+      ".write": "auth != null && root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN'",
+      "$schoolId": {
+        ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT')",
+        ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL')",
+        "settings": {
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid).exists())",
+          ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL')"
+        },
+        "users": {
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT')",
+          "$uid": {
+            ".read": "auth != null && (auth.uid == $uid || root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT')",
+            ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL')"
+          }
+        },
+        "students": {
+          ".indexOn": ["currentClass", "admissionNumber", "parentUid"],
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && query.orderByChild == 'currentClass' && query.equalTo == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/assignedClass').val()) || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PARENT' && query.orderByChild == 'admissionNumber' && query.equalTo == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/studentAdmissionNumber').val()))",
+          "$studentId": {
+            ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && data.child('currentClass').val() == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/assignedClass').val()) || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PARENT' && (data.child('parentUid').val() == auth.uid || data.child('admissionNumber').val() == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/studentAdmissionNumber').val())))",
+            ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL')"
+          }
+        },
+        "staff": {
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT')",
+          ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL')"
+        },
+        "classes": {
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid).exists())",
+          ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL')"
+        },
+        "subjects": {
+          ".indexOn": ["teacherId", "teacherUid", "classId"],
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && ((query.orderByChild == 'teacherId' && query.equalTo == auth.uid) || (query.orderByChild == 'teacherUid' && query.equalTo == auth.uid))))",
+          ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL')"
+        },
+        "attendance": {
+          "$classId": {
+            ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && $classId == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/assignedClass').val()))",
+            ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && $classId == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/assignedClass').val()))"
+          }
+        },
+        "attendanceByStudent": {
+          "$studentId": {
+            ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PARENT' && $studentId == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/studentId').val()))",
+            ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER')"
+          }
+        },
+        "attendanceLocks": {
+          "$lockId": {
+            ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid).exists())",
+            ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER')"
+          }
+        },
+        "grades": {
+          ".indexOn": ["classId", "teacherId"],
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && query.orderByChild == 'classId' && query.equalTo == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/assignedClass').val()))",
+          "$gradeId": {
+            ".write": "auth != null && !data.child('locked').val() && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && newData.child('classId').val() == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/assignedClass').val()))"
+          }
+        },
+        "reportCards": {
+          ".indexOn": ["studentId", "classId", "published"],
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && query.orderByChild == 'classId' && query.equalTo == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/assignedClass').val()) || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PARENT' && query.orderByChild == 'studentId' && query.equalTo == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/studentId').val()))",
+          ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL')"
+        },
+        "fees": {
+          ".indexOn": ["parentUid", "studentAdmissionNumber", "className"],
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PARENT' && ((query.orderByChild == 'parentUid' && query.equalTo == auth.uid) || (query.orderByChild == 'studentAdmissionNumber' && query.equalTo == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/studentAdmissionNumber').val()))))",
+          ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT')"
+        },
+        "assignments": {
+          ".indexOn": ["targetClass", "teacherId"],
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && query.orderByChild == 'targetClass' && query.equalTo == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/assignedClass').val()) || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PARENT' && query.orderByChild == 'targetClass' && query.equalTo == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/studentClass').val()))",
+          ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && newData.child('targetClass').val() == root.child('schools/'+$schoolId+'/users/'+auth.uid+'/assignedClass').val()))"
+        },
+        "assignmentSubmissions": {
+          ".indexOn": ["assignmentId", "parentUid", "studentId"],
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PARENT' && query.orderByChild == 'parentUid' && query.equalTo == auth.uid))",
+          ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PARENT' && newData.child('parentUid').val() == auth.uid))"
+        },
+        "notifications": {
+          ".indexOn": ["audience", "category", "userId"],
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT' || (query.orderByChild == 'participants/'+auth.uid && query.equalTo == true) || (query.orderByChild == 'userId' && query.equalTo == auth.uid))",
+          "$notificationId": {
+            ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT' || (root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER' && (newData.child('category').val() == 'ATTENDANCE' || newData.child('category').val() == 'ACADEMIC' || newData.child('category').val() == 'STUDENT_REPORT' || newData.child('category').val() == 'MESSAGE')) || (newData.child('category').val() == 'MESSAGE' && root.child('schools/'+$schoolId+'/conversations/'+newData.child('conversationId').val()+'/participantMap/'+auth.uid).val() == true))",
+            "read": {
+              ".write": "auth != null && (data.parent().child('userId').val() == auth.uid || data.parent().child('participants/'+auth.uid).val() == true)"
+            },
+            "readBy": {
+              "$uid": {
+                ".write": "auth != null && auth.uid == $uid && (data.parent().parent().child('participants/'+auth.uid).val() == true || data.parent().parent().child('userId').val() == auth.uid)"
+              }
+            },
+            "likedBy": {
+              "$uid": {
+                ".write": "auth != null && auth.uid == $uid && data.parent().parent().child('participants/'+auth.uid).val() == true"
+              }
+            },
+            "likes": {
+              ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || data.parent().child('participants/'+auth.uid).val() == true)"
+            },
+            "replies": {
+              "$replyId": {
+                ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || data.parent().parent().child('participants/'+auth.uid).val() == true)"
+              }
+            }
+          }
+        },
+        "conversations": {
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || query.orderByChild == 'participantMap/'+auth.uid && query.equalTo == true)",
+          "$conversationId": {
+            ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || data.child('participantMap/'+auth.uid).val() == true)",
+            ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT' || newData.child('participantMap/'+auth.uid).val() == true || data.child('participantMap/'+auth.uid).val() == true)"
+          }
+        },
+        "messages": {
+          "$conversationId": {
+            ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/conversations/'+$conversationId+'/participantMap/'+auth.uid).val() == true)",
+            "$messageId": {
+              ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/conversations/'+$conversationId+'/participantMap/'+auth.uid).val() == true)"
+            }
+          }
+        },
+        "activityLogs": {
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ACCOUNTANT')",
+          ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid).exists())"
+        },
+        "tickets": {
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid).exists())",
+          ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid).exists())"
+        },
+        "lessons": {
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid).exists())",
+          ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'TEACHER')"
+        },
+        "$other": {
+          ".read": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL')",
+          ".write": "auth != null && (root.child('superAdmins/'+auth.uid+'/role').val() == 'SUPER_ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'ADMIN' || root.child('schools/'+$schoolId+'/users/'+auth.uid+'/role').val() == 'PRINCIPAL')"
+        }
+      }
+    }
+  }
+}

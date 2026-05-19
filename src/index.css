@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth transition for the whole app when switching dark/light modes */
+body {
+    @apply transition-colors duration-500;
+}
