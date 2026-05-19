@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile, normalizeRole } from '../services/schoolPaths';
 
@@ -23,6 +23,7 @@ const Login: React.FC = () => {
 
       const userData = await getUserProfile(uid);
       const role = normalizeRole(userData.role);
+      if (!role) throw new Error('Your account profile is missing a role.');
 
       if (userData?.id) {
         if (role === 'PARENT') navigate('/parent');
@@ -32,11 +33,12 @@ const Login: React.FC = () => {
         setError('User profile not found.');
       }
     } catch (err: any) {
+      await signOut(auth).catch(() => undefined);
       // Handle specific Firebase Auth errors
       if (err.code === 'auth/invalid-credential') {
         setError('Invalid email or password.');
       } else {
-        setError('An error occurred during login.');
+        setError('Login succeeded, but this account has no valid school profile.');
       }
       console.error('Login Error:', err);
     } finally {

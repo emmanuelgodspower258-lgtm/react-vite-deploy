@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { auth } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getUserProfile, normalizeRole } from '../services/schoolPaths';
 
 const getRoleHome = (role?: string) => {
-    // All roles land on the unified dashboard which handles internal role views
+    if (role === 'PARENT') return '/parent';
+    if (role === 'TEACHER') return '/teacher';
     return '/';
 };
 
@@ -25,10 +26,16 @@ export const Login = () => {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const profile = await getUserProfile(userCredential.user.uid);
             const role = normalizeRole(profile.role);
+            if (!role) throw new Error('Your account profile is missing a role.');
             navigate(getRoleHome(role));
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to log in', err);
-            setError('Invalid email or password');
+            await signOut(auth).catch(() => undefined);
+            if (err?.code?.startsWith('auth/')) {
+                setError('Invalid email or password');
+            } else {
+                setError('Login succeeded, but this account has no valid school profile. Please ask an admin to recreate or repair the user profile.');
+            }
         } finally {
             setIsLoading(false);
         }

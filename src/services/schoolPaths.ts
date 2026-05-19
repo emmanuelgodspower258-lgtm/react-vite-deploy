@@ -4,8 +4,9 @@ import type { User } from '../types';
 
 export const SCHOOL_ROOT = 'schools';
 
-export const normalizeRole = (role: unknown): User['role'] => {
-    const rawRole = String(role || 'PARENT').trim().toUpperCase().replace(/[\s-]+/g, '_');
+export const normalizeRole = (role: unknown): User['role'] | '' => {
+    const rawRole = String(role || '').trim().toUpperCase().replace(/[\s-]+/g, '_');
+    if (!rawRole) return '';
     const roleAliases: Record<string, User['role']> = {
         ADMINISTRATOR: 'ADMIN',
         SCHOOL_ADMIN: 'ADMIN',
@@ -150,5 +151,5 @@ export const getUserProfile = async (uid: string) => {
     } catch (error) {
         console.warn('Could not scan schools while resolving a user profile:', error);
     }
-    return { uid, id: uid };
+    throw new Error('User profile not found in Realtime Database.');
 };

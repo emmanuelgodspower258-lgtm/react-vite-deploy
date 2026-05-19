@@ -25,6 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 try {
                     const userData = await getUserProfile(firebaseUser.uid);
                     const role = normalizeRole(userData.role);
+                    if (!role) throw new Error('User profile is missing a role.');
                     
                     let schoolName = userData.schoolName || '';
                     // Only attempt to fetch from the schools node if not present, and catch errors
@@ -58,6 +59,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     });
                 } catch (error) {
                     console.error("Error fetching user data from Realtime Database:", error);
+                    setUser(null);
+                    await signOut(auth).catch((signOutError) => {
+                        console.error('Failed to sign out after unresolved user profile:', signOutError);
+                    });
                 }
             } else {
                 setUser(null);
